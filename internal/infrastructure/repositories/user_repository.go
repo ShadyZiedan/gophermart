@@ -23,16 +23,6 @@ func (ur *UsersRepository) SaveUser(ctx context.Context, user *models.User) erro
 	).Scan(&user.ID)
 }
 
-func (ur *UsersRepository) FindUserById(ctx context.Context, id int) (*models.User, error) {
-	user := &models.User{}
-	sql := `SELECT users.id, users.username, users.password FROM users WHERE users.id = $1`
-	err := ur.conn.QueryRow(ctx, sql, id).Scan(&user.ID, &user.Username, &user.Password)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
 func (ur *UsersRepository) FindUserByUsername(ctx context.Context, username string) (*models.User, error) {
 	var user models.User
 	sql := `SELECT users.id, users.username, users.password FROM users WHERE users.username = $1`
