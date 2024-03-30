@@ -23,7 +23,7 @@ func NewOrderService(orderRepository orderRepository) *OrderService {
 type orderRepository interface {
 	CreateOrder(ctx context.Context, order *models.Order) error
 	FindOrderByNumber(ctx context.Context, orderNumber int) (*models.Order, error)
-	FindOrdersByUserId(ctx context.Context, userID int) ([]*models.Order, error)
+	FindOrdersByUserID(ctx context.Context, userID int) ([]*models.Order, error)
 	UpdateOrderAccrual(ctx context.Context, number string, status string, accrual float64, processedAt time.Time) error
 }
 
@@ -59,7 +59,7 @@ func (o *OrderService) CreateOrder(ctx context.Context, userID int, orderNumber 
 }
 
 func (o *OrderService) GetOrders(ctx context.Context, userID int) ([]*models.Order, error) {
-	return o.orderRepository.FindOrdersByUserId(ctx, userID)
+	return o.orderRepository.FindOrdersByUserID(ctx, userID)
 }
 
 func (o *OrderService) SetOrderAccrualResult(ctx context.Context, orderNumber string, status string, accrual float64) error {

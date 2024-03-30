@@ -41,7 +41,7 @@ func (r *OrdersRepository) FindOrderByNumber(ctx context.Context, orderNumber in
 	return &order, nil
 }
 
-func (r *OrdersRepository) FindOrdersByUserId(ctx context.Context, userID int) ([]*models.Order, error) {
+func (r *OrdersRepository) FindOrdersByUserID(ctx context.Context, userID int) ([]*models.Order, error) {
 	orders := make([]*models.Order, 0)
 	rows, err := r.conn.Query(ctx, "SELECT id, user_id, number, status, accrual, uploaded_at, processed_at FROM orders WHERE user_id = $1", userID)
 	if err != nil {
