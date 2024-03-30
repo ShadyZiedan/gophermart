@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ShadyZiedan/gophermart/internal/logger"
+	"github.com/ShadyZiedan/gophermart/internal/security"
 	"github.com/ShadyZiedan/gophermart/internal/services"
 )
 
@@ -30,11 +31,11 @@ func (h *Handler) UploadOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if userId, ok := r.Context().Value("user_id").(int); !ok {
+	if userID, ok := r.Context().Value(security.UserIDKey{}).(int); !ok {
 		http.Error(w, "No user id found", http.StatusNotFound)
 		return
 	} else {
-		_, err := h.orderService.CreateOrder(r.Context(), userId, orderNumber)
+		_, err := h.orderService.CreateOrder(r.Context(), userID, orderNumber)
 		if err != nil {
 			if errors.Is(err, services.ErrOrderAlreadyExists) {
 				w.WriteHeader(http.StatusOK)

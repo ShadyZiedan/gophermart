@@ -21,14 +21,14 @@ var (
 )
 
 type balanceRepository interface {
-	GetUserBalance(ctx context.Context, userId int) (float64, error)
-	GetUserWithdrawalBalance(ctx context.Context, userId int) (float64, error)
-	CreateWithdrawal(ctx context.Context, userId int, orderNumber int, sum float64) (*models.Withdrawal, error)
-	GetWithdrawals(ctx context.Context, userId int) ([]*models.Withdrawal, error)
+	GetUserBalance(ctx context.Context, userID int) (float64, error)
+	GetUserWithdrawalBalance(ctx context.Context, userID int) (float64, error)
+	CreateWithdrawal(ctx context.Context, userID int, orderNumber int, sum float64) (*models.Withdrawal, error)
+	GetWithdrawals(ctx context.Context, userID int) ([]*models.Withdrawal, error)
 }
 
-func (b *BalanceService) WithdrawOrder(ctx context.Context, userId int, orderNumber int, sum float64) error {
-	_, err := b.balanceRepository.CreateWithdrawal(ctx, userId, orderNumber, sum)
+func (b *BalanceService) WithdrawOrder(ctx context.Context, userID int, orderNumber int, sum float64) error {
+	_, err := b.balanceRepository.CreateWithdrawal(ctx, userID, orderNumber, sum)
 	if err != nil {
 		if errors.Is(err, repositories.ErrInsufficientBalance) {
 			return ErrInsufficientBalance
@@ -38,12 +38,12 @@ func (b *BalanceService) WithdrawOrder(ctx context.Context, userId int, orderNum
 	return nil
 }
 
-func (b *BalanceService) GetUserBalance(ctx context.Context, userId int) (float64, error) {
-	balance, err := b.balanceRepository.GetUserBalance(ctx, userId)
+func (b *BalanceService) GetUserBalance(ctx context.Context, userID int) (float64, error) {
+	balance, err := b.balanceRepository.GetUserBalance(ctx, userID)
 	return balance, err
 }
 
-func (b *BalanceService) GetUserWithdrawalBalance(ctx context.Context, userId int) (float64, error) {
-	balance, err := b.balanceRepository.GetUserWithdrawalBalance(ctx, userId)
+func (b *BalanceService) GetUserWithdrawalBalance(ctx context.Context, userID int) (float64, error) {
+	balance, err := b.balanceRepository.GetUserWithdrawalBalance(ctx, userID)
 	return balance, err
 }

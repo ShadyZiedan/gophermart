@@ -18,8 +18,8 @@ func NewOrdersRepository(conn pgConn) *OrdersRepository {
 }
 
 func (r *OrdersRepository) CreateOrder(ctx context.Context, order *models.Order) error {
-	row := r.conn.QueryRow(ctx, "INSERT INTO orders(user_id, number, status) VALUES($1, $2, $3) returning id, uploaded_at", order.UserId, order.Number, "NEW")
-	err := row.Scan(&order.Id, &order.UploadedAt)
+	row := r.conn.QueryRow(ctx, "INSERT INTO orders(user_id, number, status) VALUES($1, $2, $3) returning id, uploaded_at", order.UserID, order.Number, "NEW")
+	err := row.Scan(&order.ID, &order.UploadedAt)
 	return err
 }
 
@@ -28,7 +28,7 @@ func (r *OrdersRepository) FindOrderByNumber(ctx context.Context, orderNumber in
 	row := r.conn.QueryRow(ctx, "SELECT id, user_id, number, status, uploaded_at, processed_at FROM orders WHERE number = $1", orderNumber)
 	var uploadedAt pgtype.Timestamp
 	var processedAt pgtype.Timestamp
-	err := row.Scan(&order.Id, &order.UserId, &order.Number, &order.Status, &uploadedAt, &processedAt)
+	err := row.Scan(&order.ID, &order.UserID, &order.Number, &order.Status, &uploadedAt, &processedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -41,9 +41,9 @@ func (r *OrdersRepository) FindOrderByNumber(ctx context.Context, orderNumber in
 	return &order, nil
 }
 
-func (r *OrdersRepository) FindOrdersByUserId(ctx context.Context, userId int) ([]*models.Order, error) {
+func (r *OrdersRepository) FindOrdersByUserId(ctx context.Context, userID int) ([]*models.Order, error) {
 	orders := make([]*models.Order, 0)
-	rows, err := r.conn.Query(ctx, "SELECT id, user_id, number, status, accrual, uploaded_at, processed_at FROM orders WHERE user_id = $1", userId)
+	rows, err := r.conn.Query(ctx, "SELECT id, user_id, number, status, accrual, uploaded_at, processed_at FROM orders WHERE user_id = $1", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (r *OrdersRepository) FindOrdersByUserId(ctx context.Context, userId int) (
 		var uploadedAt pgtype.Timestamp
 		var processedAt pgtype.Timestamp
 		var accrual pgtype.Float8
-		err := rows.Scan(&order.Id, &order.UserId, &order.Number, &order.Status, &accrual, &uploadedAt, &processedAt)
+		err := rows.Scan(&order.ID, &order.UserID, &order.Number, &order.Status, &accrual, &uploadedAt, &processedAt)
 		if err != nil {
 			return nil, err
 		}

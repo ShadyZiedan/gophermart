@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ShadyZiedan/gophermart/internal/logger"
+	"github.com/ShadyZiedan/gophermart/internal/security"
 )
 
 type balanceResponse struct {
@@ -16,15 +17,15 @@ type balanceResponse struct {
 
 func (h *Handler) GetBalance(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userId := ctx.Value("user_id").(int)
-	balance, err := h.balanceService.GetUserBalance(ctx, userId)
+	userID := ctx.Value(security.UserIDKey{}).(int)
+	balance, err := h.balanceService.GetUserBalance(ctx, userID)
 	if err != nil {
 		logger.Log.Error("error getting user balance", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	withdrawnSum, err := h.balanceService.GetUserWithdrawalBalance(ctx, userId)
+	withdrawnSum, err := h.balanceService.GetUserWithdrawalBalance(ctx, userID)
 	if err != nil {
 		logger.Log.Error("error getting user withdrawal balance", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)

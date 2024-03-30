@@ -23,7 +23,7 @@ func NewOrderService(orderRepository orderRepository) *OrderService {
 type orderRepository interface {
 	CreateOrder(ctx context.Context, order *models.Order) error
 	FindOrderByNumber(ctx context.Context, orderNumber int) (*models.Order, error)
-	FindOrdersByUserId(ctx context.Context, userId int) ([]*models.Order, error)
+	FindOrdersByUserId(ctx context.Context, userID int) ([]*models.Order, error)
 	UpdateOrderAccrual(ctx context.Context, number string, status string, accrual float64, processedAt time.Time) error
 }
 
@@ -33,13 +33,13 @@ var (
 	ErrInvalidOrderNumber      = errors.New("invalid order number")
 )
 
-func (o *OrderService) CreateOrder(ctx context.Context, userId int, orderNumber int) (*models.Order, error) {
+func (o *OrderService) CreateOrder(ctx context.Context, userID int, orderNumber int) (*models.Order, error) {
 	order, err := o.orderRepository.FindOrderByNumber(ctx, orderNumber)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}
 	if order != nil {
-		if order.UserId != userId {
+		if order.UserID != userID {
 			return nil, ErrOrderBelongsToOtherUser
 		} else {
 			return nil, ErrOrderAlreadyExists
@@ -50,7 +50,7 @@ func (o *OrderService) CreateOrder(ctx context.Context, userId int, orderNumber 
 		return nil, ErrInvalidOrderNumber
 	}
 
-	order = &models.Order{UserId: userId, Number: orderNumber}
+	order = &models.Order{UserID: userID, Number: orderNumber}
 	err = o.orderRepository.CreateOrder(ctx, order)
 	if err != nil {
 		return nil, err
@@ -58,8 +58,8 @@ func (o *OrderService) CreateOrder(ctx context.Context, userId int, orderNumber 
 	return order, nil
 }
 
-func (o *OrderService) GetOrders(ctx context.Context, userId int) ([]*models.Order, error) {
-	return o.orderRepository.FindOrdersByUserId(ctx, userId)
+func (o *OrderService) GetOrders(ctx context.Context, userID int) ([]*models.Order, error) {
+	return o.orderRepository.FindOrdersByUserId(ctx, userID)
 }
 
 func (o *OrderService) SetOrderAccrualResult(ctx context.Context, orderNumber string, status string, accrual float64) error {

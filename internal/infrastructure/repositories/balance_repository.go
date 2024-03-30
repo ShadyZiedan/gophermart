@@ -15,26 +15,26 @@ var (
 	ErrInsufficientBalance = errors.New("insufficient balance")
 )
 
-func (b BalanceRepository) GetUserBalance(ctx context.Context, userId int) (float64, error) {
+func (b BalanceRepository) GetUserBalance(ctx context.Context, userID int) (float64, error) {
 	sql := `
 		-- getting users balance
 		select coalesce((SELECT sum(accrual) FROM orders WHERE orders.user_id = $1), 0) - coalesce((select sum(sum) from withdrawals where user_id = $1), 0);
        `
-	row := b.conn.QueryRow(ctx, sql, userId)
+	row := b.conn.QueryRow(ctx, sql, userID)
 	var balance float64
 	err := row.Scan(&balance)
 	return balance, err
 }
 
-func (b BalanceRepository) GetUserWithdrawalBalance(ctx context.Context, userId int) (float64, error) {
+func (b BalanceRepository) GetUserWithdrawalBalance(ctx context.Context, userID int) (float64, error) {
 	sql := `select coalesce(sum(sum), 0) from withdrawals where user_id = $1;`
-	row := b.conn.QueryRow(ctx, sql, userId)
+	row := b.conn.QueryRow(ctx, sql, userID)
 	var balance float64
 	err := row.Scan(&balance)
 	return balance, err
 }
 
-func (b BalanceRepository) CreateWithdrawal(ctx context.Context, userId int, orderNumber int, sum float64) (*models.Withdrawal, error) {
+func (b BalanceRepository) CreateWithdrawal(ctx context.Context, userID int, orderNumber int, sum float64) (*models.Withdrawal, error) {
 	tx, err := b.conn.Begin(ctx)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (b BalanceRepository) CreateWithdrawal(ctx context.Context, userId int, ord
 	defer tx.Rollback(ctx)
 
 	var balance float64
-	err = tx.QueryRow(ctx, `select sum(accrual) from orders where user_id = $1`, userId).Scan(&balance)
+	err = tx.QueryRow(ctx, `select sum(accrual) from orders where user_id = $1`, userID).Scan(&balance)
 	if err != nil {
 		return nil, err
 	}
@@ -50,13 +50,13 @@ func (b BalanceRepository) CreateWithdrawal(ctx context.Context, userId int, ord
 		return nil, ErrInsufficientBalance
 	}
 	var withdrawal models.Withdrawal
-	withdrawal.UserId = userId
+	withdrawal.UserID = userID
 	withdrawal.OrderNumber = orderNumber
 	withdrawal.Sum = sum
 
 	sql := `insert into withdrawals(user_id, number, sum, processed_at) values($1, $2, $3, current_timestamp) returning id, processed_at;`
-	row := tx.QueryRow(ctx, sql, userId, orderNumber, sum)
-	err = row.Scan(&withdrawal.Id, &withdrawal.ProcessedAt)
+	row := tx.QueryRow(ctx, sql, userID, orderNumber, sum)
+	err = row.Scan(&withdrawal.ID, &withdrawal.ProcessedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -68,17 +68,17 @@ func (b BalanceRepository) CreateWithdrawal(ctx context.Context, userId int, ord
 
 }
 
-func (b BalanceRepository) GetWithdrawals(ctx context.Context, userId int) ([]*models.Withdrawal, error) {
+func (b BalanceRepository) GetWithdrawals(ctx context.Context, userID int) ([]*models.Withdrawal, error) {
 	var withdraws []*models.Withdrawal
 	sql := `select id, user_id, number, sum, processed_at from withdrawals where user_id = $1;`
-	rows, err := b.conn.Query(ctx, sql, userId)
+	rows, err := b.conn.Query(ctx, sql, userID)
 	if err != nil {
 		return withdraws, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var w models.Withdrawal
-		err := rows.Scan(&w.Id, &w.UserId, &w.OrderNumber, &w.Sum, &w.ProcessedAt)
+		err := rows.Scan(&w.ID, &w.UserID, &w.OrderNumber, &w.Sum, &w.ProcessedAt)
 		if err != nil {
 			return nil, err
 		}

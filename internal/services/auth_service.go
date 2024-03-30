@@ -68,7 +68,7 @@ func (s *AuthService) Login(ctx context.Context, username, password string) (str
 		return "", ErrInvalidCredentials
 	}
 	claims := security.CustomClaims{
-		UserId:   user.Id,
+		UserID:   user.ID,
 		Username: user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),

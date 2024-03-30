@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/ShadyZiedan/gophermart/internal/security"
 )
 
 type orderResponseModel struct {
@@ -15,8 +17,8 @@ type orderResponseModel struct {
 }
 
 func (h *Handler) GetOrders(w http.ResponseWriter, r *http.Request) {
-	userId := r.Context().Value("user_id").(int)
-	orders, err := h.orderService.GetOrders(r.Context(), userId)
+	userID := r.Context().Value(security.UserIDKey{}).(int)
+	orders, err := h.orderService.GetOrders(r.Context(), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

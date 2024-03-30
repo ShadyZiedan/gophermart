@@ -21,15 +21,15 @@ type authService interface {
 }
 
 type orderService interface {
-	CreateOrder(ctx context.Context, userId int, orderNumber int) (*models.Order, error)
-	GetOrders(ctx context.Context, userId int) ([]*models.Order, error)
+	CreateOrder(ctx context.Context, userID int, orderNumber int) (*models.Order, error)
+	GetOrders(ctx context.Context, userID int) ([]*models.Order, error)
 }
 
 type balanceService interface {
-	GetUserBalance(ctx context.Context, userId int) (float64, error)
-	GetUserWithdrawalBalance(ctx context.Context, userId int) (float64, error)
-	WithdrawOrder(ctx context.Context, userId int, orderNumber int, sum float64) error
-	GetWithdrawals(ctx context.Context, userId int) ([]*models.Withdrawal, error)
+	GetUserBalance(ctx context.Context, userID int) (float64, error)
+	GetUserWithdrawalBalance(ctx context.Context, userID int) (float64, error)
+	WithdrawOrder(ctx context.Context, userID int, orderNumber int, sum float64) error
+	GetWithdrawals(ctx context.Context, userID int) ([]*models.Withdrawal, error)
 }
 
 type accrualService interface {

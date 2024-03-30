@@ -36,10 +36,13 @@ func GenerateRandomKey(length int) (string, error) {
 }
 
 type CustomClaims struct {
-	UserId   int    `json:"user_id"`
+	UserID   int    `json:"user_id"`
 	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
+
+type UserIDKey struct{}
+type UsernameKey struct{}
 
 func JwtVerify(secretKey []byte) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -78,8 +81,8 @@ func JwtVerify(secretKey []byte) func(http.Handler) http.Handler {
 				http.Error(w, "Invalid token", http.StatusUnauthorized)
 				return
 			} else {
-				r = r.WithContext(context.WithValue(r.Context(), "user_id", claims.UserId))
-				r = r.WithContext(context.WithValue(r.Context(), "username", claims.Username))
+				r = r.WithContext(context.WithValue(r.Context(), UserIDKey{}, claims.UserID))
+				r = r.WithContext(context.WithValue(r.Context(), UsernameKey{}, claims.Username))
 			}
 
 			next.ServeHTTP(w, r)

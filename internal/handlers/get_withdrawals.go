@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/ShadyZiedan/gophermart/internal/security"
 )
 
 type withdrawalsResponseModel struct {
@@ -15,13 +17,13 @@ type withdrawalsResponseModel struct {
 
 func (h *Handler) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userId := ctx.Value("user_id").(int)
-	withdrawals, err := h.balanceService.GetWithdrawals(ctx, userId)
+	userID := ctx.Value(security.UserIDKey{}).(int)
+	withdrawals, err := h.balanceService.GetWithdrawals(ctx, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if withdrawals == nil || len(withdrawals) == 0 {
+	if len(withdrawals) == 0 {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
